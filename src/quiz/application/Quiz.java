@@ -3,288 +3,243 @@ package quiz.application;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Quiz extends JFrame implements ActionListener {
 
-    String questions[][] = new String[10][5];
-    String answers[][] = new String[10][2];
-    String useranswers[][] = new String[10][1];
-    JLabel QuestionNo, question;
+    /* ------------ DATA STRUCTURES ------------ */
+    String[][] questions   = new String[50][5];  // [index][0‑4]
+    String[][] answers     = new String[50][2];  // [index][1] = correct text
+    String[][] userAnswers = new String[10][1];  // player choices
+    int[]      selected    = new int[10];        // 10 random indices
+
+    /* ------------ GUI COMPONENTS ------------ */
+    JLabel       qNoLabel, qTextLabel, timerLabel;
     JRadioButton opt1, opt2, opt3, opt4;
-    ButtonGroup groupoptions;
-    JButton next, submit;
-    JLabel timerLabel;
-    Timer swingTimer;
+    ButtonGroup  group;
+    JButton      nextBtn, submitBtn;
+    javax.swing.Timer swingTimer;
 
-    public static int timer = 15;
-    public static int count = 0;
-    public static int score = 0;
+    /* ------------ STATE ------------ */
+    int timer  = 15;   // seconds for countdown
+    int count  = 0;    // question counter 0‑9
+    int score  = 0;
 
-    String StudentName;
-    String RNumber;
+    final String studentName;
+    final String regNumber;
 
-    Quiz(String StudentName, String RNumber) {
-        this.StudentName = StudentName;
-        this.RNumber = RNumber;
+    /* ------------ CONSTRUCTOR ------------ */
+    public Quiz(String studentName, String regNumber) {
+        this.studentName = studentName;
+        this.regNumber   = regNumber;
 
+        /* ----- window & banner ----- */
         setBounds(50, 0, 1440, 850);
         getContentPane().setBackground(Color.WHITE);
         setLayout(null);
+        add(new JLabel(new ImageIcon(
+                ClassLoader.getSystemResource("icons/quiz.jpg")))).setBounds(0, 0, 1440, 392);
 
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icons/quiz.jpg"));
-        JLabel image = new JLabel(i1);
-        image.setBounds(0, 0, 1440, 392);
-        add(image);
+        /* ----- question number & text ----- */
+        qNoLabel   = new JLabel(); qNoLabel.setBounds(100, 450, 50, 30);
+        qTextLabel = new JLabel(); qTextLabel.setBounds(150, 450, 900, 30);
+        qNoLabel.setFont  (new Font("Tahoma", Font.PLAIN, 24));
+        qTextLabel.setFont(new Font("Tahoma", Font.PLAIN, 24));
+        add(qNoLabel); add(qTextLabel);
 
-        QuestionNo = new JLabel();
-        QuestionNo.setBounds(100, 450, 50, 30);
-        QuestionNo.setFont(new Font("Tahoma", Font.PLAIN, 24));
-        add(QuestionNo);
-
-        question = new JLabel();
-        question.setBounds(150, 450, 900, 30);
-        question.setFont(new Font("Tahoma", Font.PLAIN, 24));
-        add(question);
-
+        /* ----- timer label ----- */
         timerLabel = new JLabel("Time left - 15 seconds");
         timerLabel.setBounds(1100, 500, 300, 30);
         timerLabel.setFont(new Font("Tahoma", Font.BOLD, 22));
         timerLabel.setForeground(Color.RED);
         add(timerLabel);
 
-        // Questions
-        questions[0][0] = "What does OOP stand for?";
-        questions[0][1] = "Object-Oriented Programming";
-        questions[0][2] = "Only Object Programs";
-        questions[0][3] = "Open Office Protocol";
-        questions[0][4] = "Order Of Processing";
+        /* ----- four radio‑button options ----- */
+        opt1 = makeOption(520);
+        opt2 = makeOption(560);
+        opt3 = makeOption(600);
+        opt4 = makeOption(640);
 
-        questions[1][0] = "In Java, what is an object?";
-        questions[1][1] = "A real-world entity with state and behavior";
-        questions[1][2] = "A blueprint for creating classes";
-        questions[1][3] = "A type of variable";
-        questions[1][4] = "A method in a class";
+        group = new ButtonGroup();
+        group.add(opt1); group.add(opt2);
+        group.add(opt3); group.add(opt4);
 
-        questions[2][0] = "Which of the following is a key feature of OOP?";
-        questions[2][1] = "Encapsulation";
-        questions[2][2] = "Compilation";
-        questions[2][3] = "Execution";
-        questions[2][4] = "Interpretation";
+        /* ----- navigation buttons ----- */
+        nextBtn   = makeNavButton("Next",   550);
+        submitBtn = makeNavButton("Submit", 620);
+        submitBtn.setEnabled(false);
 
-        questions[3][0] = "Which keyword is used to create an object in Java?";
-        questions[3][1] = "new";
-        questions[3][2] = "class";
-        questions[3][3] = "void";
-        questions[3][4] = "return";
-
-        questions[4][0] = "What is a class in Java?";
-        questions[4][1] = "A blueprint for creating objects";
-        questions[4][2] = "A variable";
-        questions[4][3] = "A method";
-        questions[4][4] = "An interface";
-
-        questions[5][0] = "What concept of OOP hides data?";
-        questions[5][1] = "Encapsulation";
-        questions[5][2] = "Inheritance";
-        questions[5][3] = "Polymorphism";
-        questions[5][4] = "Abstraction";
-
-        questions[6][0] = "What is inheritance in Java?";
-        questions[6][1] = "A class acquires properties of another class";
-        questions[6][2] = "Data hiding";
-        questions[6][3] = "Method overloading";
-        questions[6][4] = "Interface implementation";
-
-        questions[7][0] = "Which feature allows methods to have the same name but different parameters?";
-        questions[7][1] = "Polymorphism";
-        questions[7][2] = "Encapsulation";
-        questions[7][3] = "Inheritance";
-        questions[7][4] = "Abstraction";
-
-        questions[8][0] = "What is a constructor in Java?";
-        questions[8][1] = "A special method to initialize objects";
-        questions[8][2] = "A class variable";
-        questions[8][3] = "A return type method";
-        questions[8][4] = "An interface method";
-
-        questions[9][0] = "What keyword is used to inherit a class in Java?";
-        questions[9][1] = "extends";
-        questions[9][2] = "implements";
-        questions[9][3] = "inherits";
-        questions[9][4] = "super";
-
-        // Answers
-        answers[0][1] = "Object-Oriented Programming";
-        answers[1][1] = "A real-world entity with state and behavior";
-        answers[2][1] = "Encapsulation";
-        answers[3][1] = "new";
-        answers[4][1] = "A blueprint for creating objects";
-        answers[5][1] = "Encapsulation";
-        answers[6][1] = "A class acquires properties of another class";
-        answers[7][1] = "Polymorphism";
-        answers[8][1] = "A special method to initialize objects";
-        answers[9][1] = "extends";
-
-        opt1 = new JRadioButton();
-        opt1.setBounds(170, 520, 700, 30);
-        opt1.setBackground(Color.WHITE);
-        opt1.setFont(new Font("Dialog", Font.PLAIN, 20));
-        add(opt1);
-
-        opt2 = new JRadioButton();
-        opt2.setBounds(170, 560, 700, 30);
-        opt2.setBackground(Color.WHITE);
-        opt2.setFont(new Font("Dialog", Font.PLAIN, 20));
-        add(opt2);
-
-        opt3 = new JRadioButton();
-        opt3.setBounds(170, 600, 700, 30);
-        opt3.setBackground(Color.WHITE);
-        opt3.setFont(new Font("Dialog", Font.PLAIN, 20));
-        add(opt3);
-
-        opt4 = new JRadioButton();
-        opt4.setBounds(170, 640, 700, 30);
-        opt4.setBackground(Color.WHITE);
-        opt4.setFont(new Font("Dialog", Font.PLAIN, 20));
-        add(opt4);
-
-        groupoptions = new ButtonGroup();
-        groupoptions.add(opt1);
-        groupoptions.add(opt2);
-        groupoptions.add(opt3);
-        groupoptions.add(opt4);
-
-        next = new JButton("Next");
-        next.setBounds(1100, 550, 200, 40);
-        next.setFont(new Font("Tahoma", Font.PLAIN, 22));
-        next.setBackground(new Color(30, 144, 255));
-        next.setForeground(Color.WHITE);
-        next.addActionListener(this);
-        add(next);
-
-        submit = new JButton("Submit");
-        submit.setBounds(1100, 620, 200, 40); // Changed Y from 710 to 620 for better visibility
-        submit.setFont(new Font("Tahoma", Font.PLAIN, 22));
-        submit.setBackground(new Color(30, 144, 255));
-        submit.setForeground(Color.WHITE);
-        submit.addActionListener(this);
-        submit.setEnabled(false);
-        submit.setVisible(true); // Ensure it is visible
-        add(submit);
-
-        start(count);
-
+        /* ----- load data & start ----- */
+        fillQuestions();          // 50 Qs
+        pickRandomTen();          // fill selected[0‑9]
+        display(count);           // show first question
         setVisible(true);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent ae) {
-        if (swingTimer != null) {
-            swingTimer.stop();
-        }
+    /* ------------ HELPERS ------------ */
+    private JRadioButton makeOption(int y) {
+        JRadioButton rb = new JRadioButton();
+        rb.setBounds(170, y, 700, 30);
+        rb.setBackground(Color.WHITE);
+        rb.setFont(new Font("Dialog", Font.PLAIN, 20));
+        add(rb);
+        return rb;
+    }
 
-        if (ae.getSource() == next) {
-            if (groupoptions.getSelection() == null) {
-                useranswers[count][0] = "";
-            } else {
-                useranswers[count][0] = groupoptions.getSelection().getActionCommand();
-            }
+    private JButton makeNavButton(String txt, int y) {
+        JButton b = new JButton(txt);
+        b.setBounds(1100, y, 200, 40);
+        b.setFont(new Font("Tahoma", Font.PLAIN, 22));
+        b.setBackground(new Color(30, 144, 255));
+        b.setForeground(Color.WHITE);
+        b.addActionListener(this);
+        add(b);
+        return b;
+    }
 
-            count++;
-            if (count == 9) {
-                next.setVisible(false);   // Hide next button
-                submit.setEnabled(true);  // Enable submit
-                submit.setVisible(true);  // Ensure it shows
-            }
+    /* ------------ LOAD 50 QUESTIONS ------------ */
+    private void fillQuestions() {
+        String[][] q = {
+            /*  0 */ {"What does OOP stand for?", "Object-Oriented Programming", "Only Object Programs", "Open Office Protocol", "Order Of Processing"},
+            /*  1 */ {"What is a class in Java?", "A blueprint for creating objects", "A method", "A function", "A loop"},
+            /*  2 */ {"What is encapsulation?", "Hiding internal state and requiring all interaction through methods", "Inheritance", "Overloading", "Interface"},
+            /*  3 */ {"Which OOP concept allows code reuse?", "Inheritance", "Polymorphism", "Abstraction", "Encapsulation"},
+            /*  4 */ {"Which keyword is used to inherit a class?", "extends", "implements", "super", "import"},
+            /*  5 */ {"What is method overloading?", "Same method name with different parameters", "Same method with same signature", "Different class with same method", "Multiple return types"},
+            /*  6 */ {"What is method overriding?", "Same method name and signature in subclass", "Different parameters", "Static method change", "Changing class name"},
+            /*  7 */ {"What is abstraction?", "Hiding implementation details", "Showing all data", "Inheritance", "Extending class"},
+            /*  8 */ {"Which of these is not an OOP principle?", "Compilation", "Inheritance", "Encapsulation", "Abstraction"},
+            /*  9 */ {"Which keyword is used to create object?", "new", "this", "extends", "final"},
+            /* 10 */ {"Java supports multiple inheritance?", "No, only through interfaces", "Yes, through classes", "Yes, through constructors", "No, Java does not support inheritance"},
+            /* 11 */ {"What is an interface?", "Abstract type used to specify behavior", "Class type", "Object type", "Primitive type"},
+            /* 12 */ {"Can an abstract class have a constructor?", "Yes", "No", "Only if final", "Only if static"},
+            /* 13 */ {"What is 'this' keyword?", "Refers to current object", "Refers to parent class", "Refers to static block", "Refers to main method"},
+            /* 14 */ {"Can we instantiate abstract class?", "No", "Yes", "Only once", "Only in main method"},
+            /* 15 */ {"What is polymorphism?", "Ability of object to take many forms", "Inheritance", "Compilation", "Abstraction"},
+            /* 16 */ {"Which keyword is used to stop inheritance?", "final", "static", "super", "this"},
+            /* 17 */ {"What is constructor?", "Special method to initialize object", "Static block", "Data field", "Return type method"},
+            /* 18 */ {"Default constructor is provided by?", "Compiler", "User", "JVM", "Object"},
+            /* 19 */ {"What is static method?", "Method that belongs to class", "Instance method", "Object method", "Virtual method"},
+            /* 20 */ {"Super keyword refers to?", "Parent class object", "Child object", "Static method", "Interface"},
+            /* 21 */ {"Which one is true for constructor?", "It has no return type", "It is static", "It is abstract", "It must be private"},
+            /* 22 */ {"Can constructor be overloaded?", "Yes", "No", "Only in interfaces", "Only with static"},
+            /* 23 */ {"Can static methods be overridden?", "No", "Yes", "Only in final class", "Only if abstract"},
+            /* 24 */ {"Final class can be?", "Not inherited", "Overridden", "Static", "Abstract"},
+            /* 25 */ {"Abstract class can have?", "Concrete methods", "Only abstract methods", "No methods", "Static main only"},
+            /* 26 */ {"Which class is parent of all classes?", "Object", "Main", "Class", "Super"},
+            /* 27 */ {"What is instanceof used for?", "Check object type", "Create object", "Delete object", "Copy object"},
+            /* 28 */ {"Which allows runtime polymorphism?", "Method Overriding", "Method Overloading", "Constructor", "Interface"},
+            /* 29 */ {"Interface can have?", "Abstract methods only (Java 7)", "Private methods", "Constructor", "Fields"},
+            /* 30 */ {"Which is used to achieve abstraction?", "Interface", "Constructor", "Method", "Object"},
+            /* 31 */ {"Multiple interfaces can be?", "Implemented", "Extended", "Inherited", "Composed"},
+            /* 32 */ {"Which is not allowed with final class?", "Inheritance", "Instantiation", "Static method", "Constructor"},
+            /* 33 */ {"Object is created with?", "new", "super", "this", "final"},
+            /* 34 */ {"Which supports dynamic method dispatch?", "Method Overriding", "Method Overloading", "Interface call", "Static method"},
+            /* 35 */ {"Which can’t be used to implement OOP?", "goto", "class", "object", "interface"},
+            /* 36 */ {"Inheritance provides?", "Code Reusability", "Security", "Flexibility", "Abstraction"},
+            /* 37 */ {"Object is?", "Instance of class", "Type of method", "Syntax", "Type of loop"},
+            /* 38 */ {"All classes extend?", "Object", "Main", "Class", "Super"},
+            /* 39 */ {"What is default access modifier?", "Package-private", "Public", "Protected", "Private"},
+            /* 40 */ {"Private members are accessible?", "Within same class", "Subclass", "Package", "Everywhere"},
+            /* 41 */ {"Getter and Setter are used for?", "Encapsulation", "Abstraction", "Inheritance", "Polymorphism"},
+            /* 42 */ {"‘implements’ keyword is used for?", "Interface", "Class", "Abstract class", "Object"},
+            /* 43 */ {"Can abstract class have main()?", "Yes", "No", "Only in subclass", "Only in interface"},
+            /* 44 */ {"What is anonymous class?", "Class without name", "Static class", "Public class", "Main class"},
+            /* 45 */ {"Constructor name should be?", "Same as class", "Different from class", "Random", "Capital only"},
+            /* 46 */ {"What is object lifecycle?", "Creation to garbage collection", "Compilation only", "Execution only", "Declaration only"},
+            /* 47 */ {"Can class extend multiple interfaces?", "Yes", "No", "Only abstract", "Only final"},
+            /* 48 */ {"Is Java 100% OOP?", "No", "Yes", "Always", "Depends"},
+            /* 49 */ {"Can interface have static method?", "Yes (since Java 8)", "No", "Only in abstract", "Only private"}
+        };
 
-            start(count);
-        } else if (ae.getSource() == submit) {
-            if (groupoptions.getSelection() == null) {
-                useranswers[count][0] = "";
-            } else {
-                useranswers[count][0] = groupoptions.getSelection().getActionCommand();
-            }
-
-            for (int i = 0; i < useranswers.length; i++) {
-                if (useranswers[i][0].equals(answers[i][1])) {
-                    score += 10;
-                }
-            }
-
-            setVisible(false);
-            new Score(StudentName, RNumber, score);
+        for (int i = 0; i < q.length; i++) {
+            questions[i] = q[i];
+            answers[i][1] = q[i][1];     // first option is correct
         }
     }
 
-    public void start(int count) {
-        if (swingTimer != null && swingTimer.isRunning()) {
-            swingTimer.stop();
-        }
-
-        QuestionNo.setText("" + (count + 1) + ". ");
-        question.setText(questions[count][0]);
-        opt1.setText(questions[count][1]);
-        opt1.setActionCommand(questions[count][1]);
-
-        opt2.setText(questions[count][2]);
-        opt2.setActionCommand(questions[count][2]);
-
-        opt3.setText(questions[count][3]);
-        opt3.setActionCommand(questions[count][3]);
-
-        opt4.setText(questions[count][4]);
-        opt4.setActionCommand(questions[count][4]);
-
-        groupoptions.clearSelection();
-        startTimer();
+    /* ------------ PICK 10 RANDOM QUESTIONS ------------ */
+    private void pickRandomTen() {
+        List<Integer> idx = new ArrayList<>();
+        for (int i = 0; i < 50; i++) idx.add(i);
+        Collections.shuffle(idx);
+        for (int i = 0; i < 10; i++) selected[i] = idx.get(i);
     }
 
-    public void startTimer() {
+    /* ------------ DISPLAY A QUESTION ------------ */
+    private void display(int num) {
+        if (swingTimer != null && swingTimer.isRunning()) swingTimer.stop();
+
+        int qIndex = selected[num];
+        qNoLabel  .setText((num + 1) + ". ");
+        qTextLabel.setText(questions[qIndex][0]);
+
+        opt1.setText(questions[qIndex][1]); opt1.setActionCommand(questions[qIndex][1]);
+        opt2.setText(questions[qIndex][2]); opt2.setActionCommand(questions[qIndex][2]);
+        opt3.setText(questions[qIndex][3]); opt3.setActionCommand(questions[qIndex][3]);
+        opt4.setText(questions[qIndex][4]); opt4.setActionCommand(questions[qIndex][4]);
+
+        group.clearSelection();
+        startCountdown();
+    }
+
+    /* ------------ COUNTDOWN TIMER ------------ */
+    private void startCountdown() {
         timer = 15;
-        timerLabel.setText("Time left - " + timer + " seconds");
+        timerLabel.setText("Time left - 15 seconds");
 
-        swingTimer = new Timer(1000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                timerLabel.setText("Time left - " + timer + " seconds");
-                timer--;
+        swingTimer = new javax.swing.Timer(1000, e -> {
+            timerLabel.setText("Time left - " + timer + " seconds");
+            timer--;
 
-                if (timer < 0) {
-                    ((Timer) e.getSource()).stop();
-
-                    if (groupoptions.getSelection() == null) {
-                        useranswers[count][0] = "";
-                    } else {
-                        useranswers[count][0] = groupoptions.getSelection().getActionCommand();
-                    }
-
-                    if (count == 9) {
-                        for (int i = 0; i < useranswers.length; i++) {
-                            if (useranswers[i][0].equals(answers[i][1])) {
-                                score += 10;
-                            }
-                        }
-                        setVisible(false);
-                        new Score(StudentName, RNumber, score);
-                    } else {
-                        count++;
-                        if (count == 9) {
-                            next.setVisible(false);   
-                            submit.setEnabled(true);  
-                            submit.setVisible(true); 
-                        }
-
-                        start(count);
-                    }
-                }
+            if (timer < 0) {
+                ((javax.swing.Timer) e.getSource()).stop();
+                recordAnswer();
+                autoNavigate();
             }
         });
-
         swingTimer.start();
     }
 
+    /* ------------ RECORD CURRENT ANSWER ------------ */
+    private void recordAnswer() {
+        if (group.getSelection() == null)
+            userAnswers[count][0] = "";
+        else
+            userAnswers[count][0] = group.getSelection().getActionCommand();
+    }
+
+    /* ------------ AUTO NEXT / SUBMIT ------------ */
+    private void autoNavigate() {
+        if (count == 9) { submitBtn.doClick(); }
+        else            { nextBtn  .doClick(); }
+    }
+
+    /* ------------ BUTTON CLICKS ------------ */
+    @Override
+    public void actionPerformed(ActionEvent ae) {
+        if (swingTimer != null) swingTimer.stop();
+        recordAnswer();
+
+        if (ae.getSource() == nextBtn) {
+            count++;
+            if (count == 9) { nextBtn.setVisible(false); submitBtn.setEnabled(true); }
+            display(count);
+
+        } else if (ae.getSource() == submitBtn) {
+            for (int i = 0; i < 10; i++)
+                if (userAnswers[i][0].equals(answers[selected[i]][1]))
+                    score += 10;
+
+            setVisible(false);
+            new Score(studentName, regNumber, score);  // your existing Score class
+        }
+    }
+
+    /* ------------ MAIN FOR TEST ------------ */
     public static void main(String[] args) {
-        new Quiz("User", "Roll Number");
+        new Quiz("User", "RollNumber");
     }
 }

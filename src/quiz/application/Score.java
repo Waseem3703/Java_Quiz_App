@@ -1,51 +1,55 @@
 package quiz.application;
 
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 
 public class Score extends JFrame implements ActionListener {
 
-    Score(String StudentName, String RNumber, int score) {
+    // ▼ store the player info so we can reuse it
+    private final String studentName;
+    private final String regNumber;
+
+    public Score(String studentName, String regNumber, int score) {
+        this.studentName = studentName;   // keep for “Try Again”
+        this.regNumber   = regNumber;
+
         setBounds(50, 0, 1440, 850);
         getContentPane().setBackground(Color.WHITE);
         setLayout(null);
 
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("icons/score.png"));
-        Image i2 = i1.getImage().getScaledInstance(300, 250, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
-        JLabel image = new JLabel(i3);
+        ImageIcon scoreImg = new ImageIcon(ClassLoader.getSystemResource("icons/score.png"));
+        Image scaled       = scoreImg.getImage().getScaledInstance(300, 250, Image.SCALE_DEFAULT);
+        JLabel image       = new JLabel(new ImageIcon(scaled));
         image.setBounds(570, 200, 300, 250);
         add(image);
 
-        JLabel heading = new JLabel("Thank you " + StudentName + ",  " + RNumber, SwingConstants.CENTER);
-        heading.setBounds(200, 50, 1040, 30); 
+        JLabel heading = new JLabel("Thank you " + studentName + ", " + regNumber, SwingConstants.CENTER);
+        heading.setBounds(200, 50, 1040, 30);
         heading.setFont(new Font("SansSerif", Font.PLAIN, 26));
-        heading.setHorizontalAlignment(SwingConstants.CENTER);
         heading.setForeground(Color.RED);
         add(heading);
 
-        JLabel lblscore = new JLabel("Your score is " + score, SwingConstants.CENTER);
-        lblscore.setBounds(200, 470, 1040, 30); 
-        lblscore.setFont(new Font("SansSerif", Font.PLAIN, 26));
-        lblscore.setHorizontalAlignment(SwingConstants.CENTER);
-        add(lblscore);
+        JLabel lblScore = new JLabel("Your score is " + score, SwingConstants.CENTER);
+        lblScore.setBounds(200, 470, 1040, 30);
+        lblScore.setFont(new Font("SansSerif", Font.PLAIN, 26));
+        add(lblScore);
 
-        JButton submit = new JButton("Try Again");
-        submit.setBounds(660, 530, 120, 40); 
-        submit.setBackground(new Color(30, 144, 255));
-        submit.setForeground(Color.WHITE);
-        submit.setFont(new Font("Tahoma", Font.PLAIN, 18));
-        submit.addActionListener(this);
-        add(submit);
+        JButton tryAgain = new JButton("Try Again");
+        tryAgain.setBounds(660, 530, 120, 40);
+        tryAgain.setBackground(new Color(30, 144, 255));
+        tryAgain.setForeground(Color.WHITE);
+        tryAgain.setFont(new Font("Tahoma", Font.PLAIN, 18));
+        tryAgain.addActionListener(this);
+        add(tryAgain);
 
         setVisible(true);
     }
 
     @Override
-    public void actionPerformed(ActionEvent ae) {
-        setVisible(false);
-        new Login();
+    public void actionPerformed(ActionEvent e) {
+        setVisible(false);                 // close this window
+        new Quiz(studentName, regNumber);  // start a fresh quiz with same user
     }
 
     public static void main(String[] args) {

@@ -18,7 +18,7 @@ public class Rules extends JFrame implements ActionListener {
         getContentPane().setBackground(Color.WHITE);
         setLayout(null);
 
-        JLabel heading = new JLabel("Welcome " + StudentName + " " + RNumber + "  to OOP QUIZ");
+        JLabel heading = new JLabel("Welcome " + StudentName + ", " + RNumber + "  to OOP QUIZ");
         heading.setBounds(50, 20, 700, 40);
         heading.setFont(new Font("SansSerif", Font.BOLD, 28));
         heading.setForeground(new Color(30, 144, 254));
@@ -37,13 +37,12 @@ public class Rules extends JFrame implements ActionListener {
         rulesPane.setFont(new Font("SansSerif", Font.PLAIN, 18));
         rulesPane.setForeground(Color.RED); // Set text color
 
-// Center text using Style
         StyledDocument doc = rulesPane.getStyledDocument();
         SimpleAttributeSet leftAlign = new SimpleAttributeSet();
         StyleConstants.setAlignment(leftAlign, StyleConstants.ALIGN_LEFT);
         doc.setParagraphAttributes(0, doc.getLength(), leftAlign, false);
-        rulesPane.setBounds(200, 120, 900, 300); // Adjust size and position
-        add(rulesPane); // Add directly without wrapping in scroll pane
+        rulesPane.setBounds(200, 120, 900, 300); 
+        add(rulesPane); 
 
 
         back = new JButton("Back");
@@ -61,7 +60,7 @@ public class Rules extends JFrame implements ActionListener {
         add(start);
 
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setUndecorated(false); // set true if you want to hide title bar
+        setUndecorated(false);
 
         setLocationRelativeTo(null);
         setVisible(true);
